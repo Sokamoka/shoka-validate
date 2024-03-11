@@ -1,11 +1,15 @@
-import { ref, watch, toValue, type MaybeRefOrGetter } from "vue";
-import { groupBy, get, toPath, head } from "lodash-es";
+import {
+  ref,
+  watch,
+  toValue,
+  type MaybeRefOrGetter,
+  provide,
+  inject,
+} from "vue";
+import { groupBy, get, toPath } from "lodash-es";
 import type { ZodTypeAny, ZodIssue } from "zod";
 
-export type ScrollOptions = {
-  rootElement?: HTMLElement;
-  offset?: number;
-};
+const ValidationApiContext = Symbol("ValidationApiContext");
 
 export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
   schema: T,
@@ -74,33 +78,11 @@ export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
     >;
   }
 
-  function scrollToFirstError(options: ScrollOptions = {}) {
-    const { rootElement = document, offset = 0 } = options;
-    const firstError: string | undefined = head(
-      Object.keys(errors.value || {})
-    );
-    if (!firstError) return;
-
-    const element = rootElement.querySelector(
-      `[data-wv-name="${convertPath(firstError)}"]`
-    );
-    if (!element) return;
-    const topOffset =
-      element.getBoundingClientRect().top -
-      document.body.getBoundingClientRect().top -
-      offset;
-
-    window.scrollTo({
-      behavior: "smooth",
-      top: topOffset,
-    });
-  }
-
   if (_options.mode === "eager") {
     validationWatch();
   }
 
-  return {
+  const api = {
     errors,
     isValid,
     validate,
@@ -108,10 +90,19 @@ export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
     clearErrors,
     externalErrors,
     getErrorMessage,
-    scrollToFirstError,
+  };
+
+  provide(ValidationApiContext, api);
+
+  return {
+    ...api,
   };
 }
 
-function convertPath(path: string) {
-  return path.replace(",", "-");
+export function useValidator() {
+  const api: Object = inject(ValidationApiContext) || {};
+
+  return {
+    ...api 
+  }
 }

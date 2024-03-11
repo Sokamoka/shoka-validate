@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, computed } from "vue";
-import { useValidation } from "wizz-validate";
+import { useValidation, useScrollToError } from "wizz-validate";
 import { type ZodSchema, z } from "zod";
 import {
   Card,
@@ -59,12 +59,13 @@ const {
   clearErrors,
   validate,
   externalErrors,
-  scrollToFirstError,
 } = useValidation(validationSchema, form);
+
+const scrollTo = useScrollToError({ offset: 40 });
 
 async function onValidate() {
   const result = await validate();
-  if (!result) return scrollToFirstError({ offset: 40 });
+  if (!result) return scrollTo();
   try {
     await externalAsyncData();
   } catch (error) {
@@ -105,6 +106,7 @@ function externalAsyncData() {
               v-model="form.name"
               placeholder="Name of your project"
               :class="{ 'border-red-500 bg-red-50': hasError('name') }"
+              :aria-invalid="hasError('name')"
             />
             <div v-if="hasError('name')" class="text-red-500 text-xs">
               {{ getErrorMessage("name") }}
@@ -121,6 +123,7 @@ function externalAsyncData() {
               v-model="form.email"
               placeholder="E-mail"
               :class="{ 'border-red-500 bg-red-50': hasError('email') }"
+              :aria-invalid="hasError('email')"
             />
             <div v-if="hasError('email')" class="text-red-500 text-xs">
               {{ getErrorMessage("email") }}
@@ -140,6 +143,7 @@ function externalAsyncData() {
               :class="{
                 'border-red-500 bg-red-50': hasError('userName'),
               }"
+              :aria-invalid="hasError('userName')"
             />
             <div v-if="hasError('userName')" class="text-red-500 text-xs">
               {{ getErrorMessage("userName") }}
@@ -167,6 +171,7 @@ function externalAsyncData() {
                 :class="{
                   'border-red-500 bg-red-50': hasError('framework'),
                 }"
+                :aria-invalid="hasError('framework')"
               >
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
@@ -197,6 +202,7 @@ function externalAsyncData() {
               :class="{
                 'border-red-500 bg-red-50': hasError('address.street'),
               }"
+              :aria-invalid="hasError('address.street')"
             />
             <div v-if="hasError('address.street')" class="text-red-500 text-xs">
               {{ getErrorMessage("address.street") }}
@@ -215,6 +221,7 @@ function externalAsyncData() {
               v-model="form.address.city"
               placeholder="City"
               :class="{ 'border-red-500 bg-red-50': hasError('address.city') }"
+              :aria-invalid="hasError('address.city')"
             />
             <div v-if="hasError('address.city')" class="text-red-500 text-xs">
               {{ getErrorMessage("address.city") }}
