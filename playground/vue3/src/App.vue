@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import Toaster from '@/components/ui/toast/Toaster.vue'
-import MainForm from "./components/MainForm.vue";
 </script>
 
 <template>
   <div class="max-w-screen-md mx-auto pt-10">
-    <MainForm />
+    <RouterView />
     <Toaster />
   </div>
 </template>

@@ -23,8 +23,11 @@
     "paths": {
       "@/*": ["./src/*"],
       "wizz-validate": ["../../dist/index.d.ts"]
-    }
+    },
+    "types": [
+      "unplugin-vue-router/client"
+    ]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue",  "./typed-router.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
