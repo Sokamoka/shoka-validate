@@ -18,7 +18,7 @@
     "./dist"
   ],
   "scripts": {
-    "dev": "pnpm run -C playground/vue3 dev",
+    "dev:playground": "pnpm run -C playground/vue3 dev",
     "build": "vue-tsc && vite build"
   },
   "keywords": [
