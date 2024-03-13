@@ -12,7 +12,7 @@ const routes = computed(() =>
   <div>
     <ul>
       <li v-for="route in routes">
-        <RouterLink :to="{ name: route.name }" v-slot="{ href }">{{
+        <RouterLink :to="route.path" v-slot="{ href }">{{
           href
         }}</RouterLink>
       </li>
