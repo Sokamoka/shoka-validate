@@ -6,14 +6,25 @@ import {
   provide,
   inject,
 } from "vue";
-import { groupBy, get, toPath } from "lodash-es";
+import { groupBy, get } from "lodash-es";
 import type { ZodTypeAny, ZodIssue } from "zod";
 
 const ValidationApiContext = Symbol("ValidationApiContext");
 
+function useValidationApiContext() {
+  let context = inject(ValidationApiContext, null)
+  if (context === null) {
+    let err = new Error(`<Is missing a parent useValidation composable.`)
+    // @ts-ignore
+    if (Error.captureStackTrace) Error.captureStackTrace(err, ValidationApiContext)
+    throw err
+  }
+  return context
+}
+
 export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
-  schema: T,
-  data: MaybeRefOrGetter<Record<string, unknown>>,
+  schema?: T,
+  data?: MaybeRefOrGetter<Record<string, unknown>>,
   options?: { mode: "eager" | "lazy" }
 ) {
   const _options = Object.assign({}, { mode: "lazy" }, options);
@@ -45,13 +56,14 @@ export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
   }
 
   async function validate() {
+    if (schema === undefined) return;
     clearErrors();
     const result = await toValue(schema).safeParseAsync(toValue(data));
 
     isValid.value = result.success;
 
     if (!result.success) {
-      errors.value = groupBy(result.error.issues, "path");
+      errors.value = groupBy(result.error.issues, (i) => i.path.join("."));
       validationWatch();
     }
 
@@ -63,11 +75,11 @@ export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
   }
 
   function getErrorMessage(errorPath: string) {
-    return get(errors.value, [toPath(errorPath).join(","), 0, "message"]);
+    return get(errors.value, [errorPath, 0, "message"]);
   }
 
   function hasError(errorPath: string) {
-    const errorObject = get(errors.value, toPath(errorPath).join(","));
+    const errorObject = get(errors.value, errorPath);
     return Boolean(errorObject);
   }
 
@@ -82,7 +94,7 @@ export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
     validationWatch();
   }
 
-  const api = {
+  let api = {
     errors,
     isValid,
     validate,
@@ -91,18 +103,22 @@ export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
     externalErrors,
     getErrorMessage,
   };
-
-  provide(ValidationApiContext, api);
+  const injectedApi = inject(ValidationApiContext, null);
+  if (injectedApi) {
+    api = injectedApi;
+  } else {
+    provide(ValidationApiContext, api);
+  }
 
   return {
     ...api,
   };
 }
 
-export function useValidator() {
-  const api: Object = inject(ValidationApiContext) || {};
+export function useValidationErrors() {
+  const api: Object = useValidationApiContext();
 
   return {
-    ...api 
-  }
+    ...api,
+  };
 }
