@@ -18,7 +18,7 @@ export default defineConfig({
     lib: {
       name: "wizz-validate",
       fileName: "index",
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: [resolve(__dirname, "src/index.ts"), resolve(__dirname, "src/valibot/index.ts")],
     },
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled

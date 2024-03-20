@@ -6,7 +6,12 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.umd.cjs"
+      "require": "./dist/index.cjs"
+    },
+    "./valibot": {
+      "import": "./dist/valibot/index2.js",
+      "require": "./dist/index2.cjs",
+      "types": "./dist/valibot/index.d.ts"
     }
   },
   "main": "./dist/index.umd.cjs",
@@ -28,6 +33,7 @@
   "author": "Ákos Stégner",
   "license": "MIT",
   "dependencies": {
+    "valibot": "^0.30.0",
     "vue": "^3.4.21",
     "zod": "^3.22.4"
   },
