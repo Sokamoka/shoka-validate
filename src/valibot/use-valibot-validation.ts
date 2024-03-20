@@ -10,6 +10,8 @@ import { groupBy, get } from "lodash-es";
 import { safeParseAsync } from "valibot";
 import type { AnySchema, SchemaIssue } from "valibot";
 
+type MaybeRefOrGetterArray<T> = MaybeRefOrGetter<T> | MaybeRefOrGetter<T>[];
+
 const ValidationApiContext = Symbol("ValidationApiContext");
 
 function useValidationApiContext() {
@@ -25,7 +27,7 @@ function useValidationApiContext() {
 
 export function useValibotValidation<T extends MaybeRefOrGetter<AnySchema>>(
   schema?: T,
-  data?: MaybeRefOrGetter<Record<string, unknown>>,
+  data?: MaybeRefOrGetterArray<Record<string, unknown>>,
   options?: { mode: "eager" | "lazy" }
 ) {
   const _options = Object.assign({}, { mode: "lazy" }, options);

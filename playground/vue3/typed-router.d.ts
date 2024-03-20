@@ -23,5 +23,6 @@ declare module 'vue-router/auto-routes' {
     '/invisible-form-elements': RouteRecordInfo<'/invisible-form-elements', '/invisible-form-elements', Record<never, never>, Record<never, never>>,
     '/nested-validation': RouteRecordInfo<'/nested-validation', '/nested-validation', Record<never, never>, Record<never, never>>,
     '/simple-form': RouteRecordInfo<'/simple-form', '/simple-form', Record<never, never>, Record<never, never>>,
+    '/valibot-simple-form': RouteRecordInfo<'/valibot-simple-form', '/valibot-simple-form', Record<never, never>, Record<never, never>>,
   }
 }

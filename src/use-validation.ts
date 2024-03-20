@@ -24,7 +24,7 @@ function useValidationApiContext() {
 
 export function useValidation<T extends MaybeRefOrGetter<ZodTypeAny>>(
   schema?: T,
-  data?: MaybeRefOrGetter<Record<string, unknown>>,
+  data?: MaybeRefOrGetter<Record<string, unknown>> | MaybeRefOrGetter<Record<string, unknown>>[],
   options?: { mode: "eager" | "lazy" }
 ) {
   const _options = Object.assign({}, { mode: "lazy" }, options);
