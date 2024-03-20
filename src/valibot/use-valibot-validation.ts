@@ -18,8 +18,9 @@ function useValidationApiContext() {
   let context = inject(ValidationApiContext, null);
   if (context === null) {
     let err = new Error(`<Is missing a parent useValidation composable.`);
-    // @ts-ignore
-    if (Error.captureStackTrace) Error.captureStackTrace(err, ValidationApiContext);
+    if (Error.captureStackTrace)
+      // @ts-ignore
+      Error.captureStackTrace(err, ValidationApiContext);
     throw err;
   }
   return context;
@@ -72,7 +73,11 @@ export function useValibotValidation<T extends MaybeRefOrGetter<AnySchema>>(
       validationWatch();
     }
 
-    return result.success;
+    return {
+      valid: result.success,
+      invalid: !result.success,
+      output: result.output,
+    };
   }
 
   function clearErrors() {

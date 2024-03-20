@@ -66,8 +66,8 @@ const {
 const scrollTo = useScrollToError({ offset: 40 });
 
 async function onValidate() {
-  const result = await validate();
-  if (!result) return scrollTo();
+  const { invalid } = await validate();
+  if (invalid) return scrollTo();
   try {
     await externalAsyncData();
   } catch (error) {
