@@ -12,6 +12,12 @@ import type { BaseSchema, SchemaIssue } from "valibot";
 
 type MaybeRefOrGetterArray<T> = MaybeRefOrGetter<T> | MaybeRefOrGetter<T>[];
 
+type ValidateElements = {
+  valid: boolean;
+  invalid: boolean;
+  output: any;
+};
+
 const ValidationApiContext = Symbol("ValidationApiContext");
 
 function useValidationApiContext() {
@@ -59,8 +65,8 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
     );
   }
 
-  async function validate() {
-    if (schema === undefined) return;
+  async function validate(): Promise<ValidateElements> {
+    if (schema === undefined) throw Error('Need Schema');
     clearErrors();
     const result = await safeParseAsync(toValue(schema), toValue(data));
 

@@ -26,7 +26,7 @@ import { useToast } from "@/components/ui/toast/use-toast";
 type FormSchema = {
   email: string;
   password: string;
-  dateOfBirth: string | null;
+  dateOfBirth: Date | number;
 };
 
 const passwordRules = shallowRef({
@@ -38,7 +38,7 @@ const passwordRules = shallowRef({
 const form = reactive<FormSchema>({
   email: "",
   password: "",
-  dateOfBirth: null,
+  dateOfBirth: 0,
 });
 
 const ValidationSchema = v.object({

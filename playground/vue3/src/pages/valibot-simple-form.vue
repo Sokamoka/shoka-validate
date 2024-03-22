@@ -3,7 +3,6 @@ import { reactive, computed } from "vue";
 import { useValibotValidation } from "wizz-validate/valibot";
 import { useScrollToError } from "wizz-validate";
 import * as v from "valibot";
-import type ValiSchema from "valibot";
 import {
   Card,
   CardContent,
@@ -39,7 +38,7 @@ const form = reactive({
   },
 });
 
-const validationSchema = computed<ValiSchema>(() =>
+const validationSchema = computed(() =>
   v.object({
     name: v.string([v.minLength(1, "The name field is required")]),
     email: v.string([v.email("Please enter a valid email")]),
