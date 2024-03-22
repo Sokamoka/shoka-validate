@@ -1,13 +1,13 @@
-# WizzValidate
+# Shoka Validate
 
-POC for WizzAir Form validation
+Object base Form validation
 
 ## ZOD base vue3 composable
 
 ```js
 import { reactive } from "vue";
 import { z } from "zod";
-import { useValidation } from "wizz-validate";
+import { useValidation } from "shoka-validate";
 
 const form = reactive({
   name: "",
