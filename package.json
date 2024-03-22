@@ -9,9 +9,9 @@
       "require": "./dist/index.cjs"
     },
     "./valibot": {
-      "import": "./dist/valibot/index2.js",
-      "require": "./dist/index2.cjs",
-      "types": "./dist/valibot/index.d.ts"
+      "import": "./dist/valibot.js",
+      "require": "./dist/valibot.cjs",
+      "types": "./dist/valibot.d.ts"
     }
   },
   "main": "./dist/index.umd.cjs",

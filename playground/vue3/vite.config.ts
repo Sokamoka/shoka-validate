@@ -18,7 +18,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "wizz-validate/valibot": path.resolve(__dirname, "../../src/valibot/index.ts"),
+      "wizz-validate/valibot": path.resolve(__dirname, "../../src/valibot.ts"),
       "wizz-validate": path.resolve(__dirname, "../../src/index.ts"),
     },
   },
