@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { reactive, watch, shallowRef, h } from "vue";
+import { format } from "date-fns";
 import * as v from "valibot";
-import type ValiSchema from "valibot";
+// import type { BaseSchema } from "valibot";
 import { useValibotValidation, Password } from "wizz-validate/valibot";
 import {
   Card,
@@ -14,7 +15,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useToast } from "@/components/ui/toast/use-toast";
+
+type FormSchema = {
+  email: string;
+  password: string;
+  dateOfBirth: string | null;
+};
 
 const passwordRules = shallowRef({
   length: false,
@@ -22,14 +35,16 @@ const passwordRules = shallowRef({
   upperAndLower: false,
 });
 
-const form = reactive({
+const form = reactive<FormSchema>({
   email: "",
   password: "",
+  dateOfBirth: null,
 });
 
-const ValidationSchema: ValiSchema = v.object({
+const ValidationSchema = v.object({
   email: v.string([v.minLength(1), v.email()]),
   password: Password,
+  dateOfBirth: v.date("Please add date of birth"),
 });
 
 const { errors, getErrorMessage, hasError, validate } = useValibotValidation(
@@ -41,7 +56,7 @@ const { toast } = useToast();
 
 watch(() => form.password, checkPassword, { immediate: true });
 
-function checkPassword(value) {
+function checkPassword(value: string) {
   const passwordSchema = v.pick(ValidationSchema, ["password"]);
   const result = v.safeParse(passwordSchema, { password: value });
   // console.log(result);
@@ -54,7 +69,7 @@ function checkPassword(value) {
       ({ expected }) => expected === "/[0-9]/"
     ),
     upperAndLower: !(result.issues || []).some((issue) =>
-      ["/[a-z]/", "/[A-Z]/"].includes(issue.expected)
+      ["/[a-z]/", "/[A-Z]/"].includes(issue?.expected ?? "")
     ),
   };
 }
@@ -153,6 +168,41 @@ const onValidate = async () => {
               {{ getErrorMessage("password") }}
             </div>
           </section>
+
+          <section>
+            <Label
+              for="dateOfBirth"
+              :class="{ 'text-red-500 ': hasError('dateOfBirth') }"
+              >Date Of Birth</Label
+            >
+            <Popover>
+              <PopoverTrigger as-child>
+                <Button
+                  id="dateOfBirth"
+                  :variant="'outline'"
+                  :class="[
+                    'w-[280px] justify-start text-left font-normal block',
+                    {
+                      'border-red-500 bg-red-50': hasError('dateOfBirth'),
+                    },
+                  ]"
+                >
+                  <!-- <CalendarIcon class="mr-2 h-4 w-4" /> -->
+                  <span>{{
+                    form.dateOfBirth
+                      ? format(form.dateOfBirth, "PPP")
+                      : "Pick a date"
+                  }}</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent class="w-auto p-0">
+                <Calendar v-model="form.dateOfBirth" />
+              </PopoverContent>
+            </Popover>
+            <div v-if="hasError('dateOfBirth')" class="text-red-500 text-xs">
+              {{ getErrorMessage("dateOfBirth") }}
+            </div>
+          </section>
         </div>
       </form>
     </CardContent>
@@ -162,5 +212,6 @@ const onValidate = async () => {
     </CardFooter>
   </Card>
 
+  <pre>{{ form }}</pre>
   <pre>{{ errors }}</pre>
 </template>

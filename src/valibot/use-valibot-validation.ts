@@ -8,7 +8,7 @@ import {
 } from "vue";
 import { groupBy, get } from "lodash-es";
 import { safeParseAsync } from "valibot";
-import type { AnySchema, SchemaIssue } from "valibot";
+import type { BaseSchema, SchemaIssue } from "valibot";
 
 type MaybeRefOrGetterArray<T> = MaybeRefOrGetter<T> | MaybeRefOrGetter<T>[];
 
@@ -26,7 +26,7 @@ function useValidationApiContext() {
   return context;
 }
 
-export function useValibotValidation<T extends MaybeRefOrGetter<AnySchema>>(
+export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
   schema?: T,
   data?: MaybeRefOrGetterArray<Record<string, unknown>>,
   options?: { mode: "eager" | "lazy" }
