@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import * as v from "valibot";
 // import type { BaseSchema } from "valibot";
 import { useValibotValidation, Password } from "wizz-validate/valibot";
+import { useScrollToError } from "wizz-validate";
 import {
   Card,
   CardContent,
@@ -52,6 +53,8 @@ const { errors, getErrorMessage, hasError, validate } = useValibotValidation(
   form
 );
 
+const scrollTo = useScrollToError({ offset: 40 });
+
 const { toast } = useToast();
 
 watch(() => form.password, checkPassword, { immediate: true });
@@ -60,15 +63,13 @@ function checkPassword(value: string) {
   const passwordSchema = v.pick(ValidationSchema, ["password"]);
   const result = v.safeParse(passwordSchema, { password: value });
   // console.log(result);
-
+  const issues = result.issues || [];
   passwordRules.value = {
-    length: !(result.issues || []).some((issue) =>
+    length: !issues.some((issue) =>
       ["min_length", "max_length"].includes(issue.context)
     ),
-    numberAndLetter: !(result.issues || []).some(
-      ({ expected }) => expected === "/[0-9]/"
-    ),
-    upperAndLower: !(result.issues || []).some((issue) =>
+    numberAndLetter: !issues.some(({ expected }) => expected === "/[0-9]/"),
+    upperAndLower: !issues.some((issue) =>
       ["/[a-z]/", "/[A-Z]/"].includes(issue?.expected ?? "")
     ),
   };
@@ -77,8 +78,7 @@ function checkPassword(value: string) {
 const onValidate = async () => {
   const { invalid, output } = await validate();
   if (invalid) {
-    // return scrollTo();
-    return;
+    return scrollTo();
   }
   toast({
     title: "Form valid!",
@@ -180,6 +180,7 @@ const onValidate = async () => {
                 <Button
                   id="dateOfBirth"
                   :variant="'outline'"
+                  :aria-invalid="hasError('dateOfBirth')"
                   :class="[
                     'w-[280px] justify-start text-left font-normal block',
                     {
