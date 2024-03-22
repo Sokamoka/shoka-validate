@@ -22,8 +22,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "wizz-validate": ["../../dist/index.d.ts"],
-      "wizz-validate/valibot": ["../../dist/valibot.d.ts"]
+      "shoka-validate": ["../../dist/index.d.ts"],
+      "shoka-validate/valibot": ["../../dist/valibot.d.ts"]
     },
     "types": [
       "unplugin-vue-router/client"

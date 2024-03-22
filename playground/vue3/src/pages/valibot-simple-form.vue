@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, computed } from "vue";
-import { useValibotValidation } from "wizz-validate/valibot";
-import { useScrollToError } from "wizz-validate";
+import { useValibotValidation } from "shoka-validate/valibot";
+import { useScrollToError } from "shoka-validate";
 import * as v from "valibot";
 import {
   Card,

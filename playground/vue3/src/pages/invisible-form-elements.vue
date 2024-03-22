@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, h, reactive, ref } from "vue";
-import { useValidation, useScrollToError } from "wizz-validate";
+import { useValidation, useScrollToError } from "shoka-validate";
 import { type ZodSchema, z } from "zod";
 import {
   Card,

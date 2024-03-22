@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useValidation } from "wizz-validate";
+import { useValidation } from "shoka-validate";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";

@@ -16,7 +16,7 @@ export default defineConfig({
 
   build: {
     lib: {
-      name: "wizz-validate",
+      name: "shoka-validate",
       // fileName: "index",
       entry: [resolve(__dirname, "src/index.ts"), resolve(__dirname, "src/valibot.ts")],
     },

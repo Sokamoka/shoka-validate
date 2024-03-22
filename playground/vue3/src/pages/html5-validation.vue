@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
-import { useFormValidation, useScrollToError } from "wizz-validate";
+import { useFormValidation, useScrollToError } from "shoka-validate";
 import {
   Card,
   CardContent,

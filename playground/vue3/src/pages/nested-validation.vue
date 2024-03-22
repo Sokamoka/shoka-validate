@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, reactive } from "vue";
-import { useValidation } from "wizz-validate";
+import { useValidation } from "shoka-validate";
 import { type ZodSchema, z } from "zod";
 import { Button } from "@/components/ui/button";
 

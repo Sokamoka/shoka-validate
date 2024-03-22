@@ -1,4 +1,4 @@
 export { useValibotValidation } from "./valibot/use-valibot-validation";
 
-// ValidationSchamas
-export { Password } from "./valibot/validation-schamas";
+// ValidationSchemas
+export { Password } from "./valibot/validation-schemas";

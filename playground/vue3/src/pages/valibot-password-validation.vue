@@ -3,8 +3,8 @@ import { reactive, watch, shallowRef, h } from "vue";
 import { format } from "date-fns";
 import * as v from "valibot";
 // import type { BaseSchema } from "valibot";
-import { useValibotValidation, Password } from "wizz-validate/valibot";
-import { useScrollToError } from "wizz-validate";
+import { useValibotValidation, Password } from "shoka-validate/valibot";
+import { useScrollToError } from "shoka-validate";
 import {
   Card,
   CardContent,
