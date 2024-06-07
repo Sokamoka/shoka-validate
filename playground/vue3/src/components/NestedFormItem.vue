@@ -1,10 +1,18 @@
 <script lang="ts" setup>
 import { computed, reactive } from "vue";
 import * as v from "valibot";
+import { format } from "date-fns";
 import { useValibotValidation } from "shoka-validate/valibot";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import NestedRadioGroup from "./NestedRadioGroup.vue";
 
 const props = defineProps<{
@@ -13,7 +21,7 @@ const props = defineProps<{
 }>();
 
 const firstName = defineModel<string>("firstName");
-const dob = defineModel<string>("dob");
+const dob = defineModel<Date>("dob");
 const gender = defineModel<string>("gender");
 
 const data = reactive({
@@ -24,17 +32,26 @@ const data = reactive({
 
 const schema = computed(() =>
   v.object({
-    firstName: v.string("The name field is required", [v.minLength(1)]),
-    gender: v.string("The gender field is required", [v.minLength(1)]),
+    firstName: v.string([v.minLength(1, "The name field is required")]),
+    gender: v.string([v.minLength(1, "The gender field is required")]),
     ...(props.isDobRequired && {
-      dob: v.string("The name field is required", [v.minLength(1)]),
+      dob: v.date("Please add date of birth"),
     }),
   })
 );
 
-const { hasError, getErrorMessage } = useValibotValidation(schema, data, {
-  registerAs: `person${props.id}`,
-});
+const { hasError, getErrorMessage, validate } = useValibotValidation(
+  schema,
+  data,
+  {
+    registerAs: `person${props.id}`,
+  }
+);
+
+async function onNext() {
+  const result = await validate();
+  console.log(result);
+}
 </script>
 
 <template>
@@ -69,7 +86,27 @@ const { hasError, getErrorMessage } = useValibotValidation(schema, data, {
           :class="{ 'text-red-500 ': hasError(`person${props.id}.dob`) }"
           >Date Of Birth</Label
         >
-        <Input
+        <Popover>
+          <PopoverTrigger as-child>
+            <Button
+              id="dateOfBirth"
+              :variant="'outline'"
+              :aria-invalid="hasError(`person${props.id}.dob`)"
+              :class="[
+                'w-[280px] justify-start text-left font-normal block',
+                {
+                  'border-red-500 bg-red-50': hasError(`person${props.id}.dob`),
+                },
+              ]"
+            >
+              <span>{{ dob ? format(dob, "PPP") : "Pick a date" }}</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent class="w-auto p-0">
+            <Calendar v-model="dob" />
+          </PopoverContent>
+        </Popover>
+        <!-- <Input
           id="dateOfBirth"
           v-model="dob"
           placeholder="Date Of Birth"
@@ -77,7 +114,7 @@ const { hasError, getErrorMessage } = useValibotValidation(schema, data, {
             'border-red-500 bg-red-50': hasError(`person${props.id}.dob`),
           }"
           :aria-invalid="hasError(`dob`)"
-        />
+        /> -->
         <div
           v-if="hasError(`person${props.id}.dob`)"
           class="text-red-500 text-xs"
@@ -87,6 +124,8 @@ const { hasError, getErrorMessage } = useValibotValidation(schema, data, {
       </section>
 
       <NestedRadioGroup v-model:gender="gender" :id />
+
+      <Button variant="secondary" @click="onNext">Next</Button>
     </CardContent>
   </Card>
 </template>

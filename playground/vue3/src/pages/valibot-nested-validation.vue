@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { reactive } from "vue";
+import { h, reactive } from "vue";
 import { useValibotValidation } from "shoka-validate/valibot";
 import { useScrollToError } from "shoka-validate";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast/use-toast";
 
 import FormItem from "@/components/NestedFormItem.vue";
 
@@ -27,6 +28,7 @@ const members = reactive([
   },
 ]);
 
+const { toast } = useToast();
 
 const { errors, validateAll } = useValibotValidation();
 
@@ -34,8 +36,15 @@ const scrollTo = useScrollToError({ offset: 40 });
 
 const onValidate = async () => {
   const result = await validateAll();
-  console.log('validateAll:', result);
   if (result.invalid) return scrollTo();
+  toast({
+    title: "Form valid!",
+    description: h(
+      "pre",
+      { class: "mt-2 w-[340px] rounded-md bg-lime-600 p-4" },
+      h("code", { class: "text-white" }, JSON.stringify(result.output, null, 2))
+    ),
+  });
 };
 </script>
 
@@ -60,12 +69,11 @@ const onValidate = async () => {
     </div>
 
     <div>
-      <pre>
-        {{ members }}
-      </pre>
-      <pre>
-        {{ errors }}
-      </pre>
+      <pre>{{ members }}</pre>
+
+      <pre
+        class="mt-2 w-full rounded-md bg-rose-50 p-4"
+      > Errors: <code class="w-full">{{ JSON.stringify(errors, null, 2) }}</code></pre>
     </div>
   </div>
 </template>
