@@ -2,11 +2,12 @@ import {
   ref,
   watch,
   toValue,
-  type MaybeRefOrGetter,
   provide,
+  onMounted,
   inject,
+  type MaybeRefOrGetter,
 } from "vue";
-import { groupBy, get } from "lodash-es";
+import { groupBy, get, set } from "lodash-es";
 import { safeParseAsync } from "valibot";
 import type { BaseSchema, SchemaIssue } from "valibot";
 
@@ -16,6 +17,25 @@ type ValidateElements = {
   valid: boolean;
   invalid: boolean;
   output: any;
+};
+
+type ValidationReturns = Promise<ValidateElements>;
+
+type ValidationFn = () => Promise<ValidateElements>;
+
+interface Errors {
+  [key: string]: Errors | SchemaIssue[];
+}
+
+type Api = {
+  errors: Errors;
+  isValid: boolean;
+  validate: () => void;
+  hasError: (path: string) => boolean;
+  clearErrors: () => void;
+  externalErrors: () => void;
+  getErrorMessage: (path: string) => string;
+  register: (fn: ValidationFn) => void;
 };
 
 const ValidationApiContext = Symbol("ValidationApiContext");
@@ -35,14 +55,15 @@ function useValidationApiContext() {
 export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
   schema?: T,
   data?: MaybeRefOrGetterArray<Record<string, unknown>>,
-  options?: { mode: "eager" | "lazy" }
+  options?: { mode?: "eager" | "lazy"; registerAs?: string }
 ) {
-  const _options = Object.assign({}, { mode: "lazy" }, options);
+  const _options = Object.assign({}, { mode: "lazy", registerAs: "" }, options);
 
   let unwatch: null | (() => void) = null;
 
   const isValid = ref(false);
-  const errors = ref<Record<string, SchemaIssue[]> | null>(null);
+  const errors = ref<Errors | null>(null);
+  const validations = ref<ValidationFn[]>([]);
 
   watch(
     () => toValue(schema),
@@ -65,17 +86,28 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
     );
   }
 
-  async function validate(): Promise<ValidateElements> {
-    if (schema === undefined) throw Error('Need Schema');
-    clearErrors();
+  async function validate(): ValidationReturns {
+    if (schema === undefined) throw Error("Need Schema");
+
+    if (_options.registerAs) {
+      set(api.errors.value || {}, _options.registerAs, null);
+    } else {
+      api.errors.value = null;
+    }
     const result = await safeParseAsync(toValue(schema), toValue(data));
 
     isValid.value = result.success;
 
     if (!result.success) {
-      errors.value = groupBy(result.issues, (i) =>
+      const valiErrors = groupBy(result.issues, (i) =>
         (i.path || []).map((ii) => ii.key).join(".")
       );
+      api.errors.value = {
+        ...api.errors.value,
+        ...(_options.registerAs
+          ? { [_options.registerAs]: valiErrors }
+          : valiErrors),
+      };
       validationWatch();
     }
 
@@ -87,15 +119,15 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
   }
 
   function clearErrors() {
-    errors.value = null;
+    api.errors.value = null;
   }
 
   function getErrorMessage(errorPath: string) {
-    return get(errors.value, [errorPath, 0, "message"]);
+    return get(api.errors.value, [errorPath, 0, "message"].join("."));
   }
 
   function hasError(errorPath: string) {
-    const errorObject = get(errors.value, errorPath);
+    const errorObject = get(api.errors.value, errorPath);
     return Boolean(errorObject);
   }
 
@@ -110,6 +142,15 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
     validationWatch();
   }
 
+  async function validateAll() {
+    const result = await Promise.all(
+      validations.value.map((v: ValidationFn) => v())
+    );
+    const finalResult = result.every((item: ValidateElements) => item.valid);
+
+    return { valid: finalResult, invalid: !finalResult };
+  }
+
   let api = {
     errors,
     isValid,
@@ -118,21 +159,32 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
     clearErrors,
     externalErrors,
     getErrorMessage,
+    register: (fn: ValidationFn) => {
+      validations.value.push(fn);
+    },
   };
   const injectedApi = inject(ValidationApiContext, null);
   if (injectedApi) {
     api = injectedApi;
+    onMounted(() => api.register(validate));
   } else {
     provide(ValidationApiContext, api);
   }
 
   return {
-    ...api,
+    errors,
+    isValid,
+    validate,
+    hasError,
+    clearErrors,
+    externalErrors,
+    getErrorMessage,
+    validateAll,
   };
 }
 
-export function useValidationErrors() {
-  const api: Object = useValidationApiContext();
+export function useValidationErrors(): Api {
+  const api: Api = useValidationApiContext();
 
   return {
     ...api,
