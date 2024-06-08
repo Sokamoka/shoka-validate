@@ -11,19 +11,19 @@ const members = reactive([
   {
     firstName: "",
     isDobRequired: false,
-    dob: "",
+    dob: null,
     gender: "",
   },
   {
     firstName: "",
     isDobRequired: true,
-    dob: "",
+    dob: null,
     gender: "",
   },
   {
     firstName: "",
     isDobRequired: true,
-    dob: "",
+    dob: null,
     gender: "",
   },
 ]);
@@ -71,9 +71,10 @@ const onValidate = async () => {
     <div>
       <pre>{{ members }}</pre>
 
+      <p class="font-bold">Errors:</p>
       <pre
         class="mt-2 w-full rounded-md bg-rose-50 p-4"
-      > Errors: <code class="w-full">{{ JSON.stringify(errors, null, 2) }}</code></pre>
+      ><code class="w-full">{{ JSON.stringify(errors, null, 2) }}</code></pre>
     </div>
   </div>
 </template>

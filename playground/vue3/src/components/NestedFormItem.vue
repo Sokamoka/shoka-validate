@@ -21,7 +21,7 @@ const props = defineProps<{
 }>();
 
 const firstName = defineModel<string>("firstName");
-const dob = defineModel<Date>("dob");
+const dob = defineModel<Date | null>("dob");
 const gender = defineModel<string>("gender");
 
 const data = reactive({
