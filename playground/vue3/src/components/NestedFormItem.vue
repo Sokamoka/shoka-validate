@@ -1,8 +1,14 @@
 <script lang="ts" setup>
 import { computed, reactive } from "vue";
-import * as v from "valibot";
+// import * as v from "valibot";
 import { format } from "date-fns";
-import { useValibotValidation } from "shoka-validate/valibot";
+import {
+  useValibotValidation,
+  object,
+  RequiredString,
+  RequiredDate,
+  GenericSchema,
+} from "shoka-validate/valibot";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -14,6 +20,12 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import NestedRadioGroup from "./NestedRadioGroup.vue";
+
+type Schema = {
+  firstName: string;
+  gender: string;
+  dob?: string | Date;
+};
 
 const props = defineProps<{
   id: number;
@@ -30,14 +42,15 @@ const data = reactive({
   gender,
 });
 
-const schema = computed(() =>
-  v.object({
-    firstName: v.string([v.minLength(1, "The name field is required")]),
-    gender: v.string([v.minLength(1, "The gender field is required")]),
-    ...(props.isDobRequired && {
-      dob: v.date("Please add date of birth"),
-    }),
-  })
+const schema = computed(
+  () =>
+    object({
+      firstName: RequiredString("firstName"),
+      gender: RequiredString("gender"),
+      ...(props.isDobRequired && {
+        dob: RequiredDate("Date of Birth"),
+      }),
+    })
 );
 
 const { hasError, getErrorMessage, validate } = useValibotValidation(

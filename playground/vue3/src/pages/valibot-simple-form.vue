@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { reactive, computed } from "vue";
-import { useValibotValidation } from "shoka-validate/valibot";
+import {
+  useValibotValidation,
+  object,
+  RequiredString,
+  Email,
+} from "shoka-validate/valibot";
 import { useScrollToError } from "shoka-validate";
-import * as v from "valibot";
+// import * as v from "valibot";
 import {
   Card,
   CardContent,
@@ -26,11 +31,23 @@ import { useToast } from "@/components/ui/toast/use-toast";
 
 const { toast } = useToast();
 
-const form = reactive({
+type FormSchema = {
+  name: string;
+  email: string;
+  userName: string;
+  framework?: string;
+  isFrameworkRequired: boolean;
+  address: {
+    street: string;
+    city: string;
+  };
+};
+
+const form = reactive<FormSchema>({
   name: "",
   email: "",
   userName: "",
-  framework: "",
+  framework: undefined,
   isFrameworkRequired: false,
   address: {
     street: "",
@@ -38,19 +55,42 @@ const form = reactive({
   },
 });
 
-const validationSchema = computed(() =>
-  v.object({
-    name: v.string([v.minLength(1, "The name field is required")]),
-    email: v.string([v.email("Please enter a valid email")]),
-    userName: v.string([v.minLength(1, "The username field is required")]),
-    ...(form.isFrameworkRequired && {
-      framework: v.string([v.minLength(1, "Please select Framework")]),
-    }),
-    address: v.object({
-      street: v.string([v.minLength(1, "The street field is required")]),
-      city: v.string([v.minLength(1, "The city field is required")]),
-    }),
-  })
+// const validationSchema = computed(() =>
+//   object({
+//     name: RequiredString("name"),
+//     email: Email,
+//     userName: RequiredString("username"),
+//     ...(form.isFrameworkRequired && {
+//       framework: RequiredString("Framework"),
+//     }),
+//     address: object({
+//       street: RequiredString("street"),
+//       city: RequiredString("city"),
+//     }),
+//   })
+// );
+
+const schema = computed(() =>
+  form.isFrameworkRequired
+    ? object({
+        name: RequiredString("name"),
+        email: Email,
+        userName: RequiredString("username"),
+        framework: RequiredString("Framework"),
+        address: object({
+          street: RequiredString("street"),
+          city: RequiredString("city"),
+        }),
+      })
+    : object({
+        name: RequiredString("name"),
+        email: Email,
+        userName: RequiredString("username"),
+        address: object({
+          street: RequiredString("street"),
+          city: RequiredString("city"),
+        }),
+      })
 );
 
 const {
@@ -60,7 +100,7 @@ const {
   clearErrors,
   validate,
   externalErrors,
-} = useValibotValidation(validationSchema, form);
+} = useValibotValidation(schema, form);
 
 const scrollTo = useScrollToError({ offset: 40 });
 

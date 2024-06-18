@@ -8,9 +8,9 @@ import {
   type MaybeRefOrGetter,
   type Ref,
 } from "vue";
-import { groupBy, get, set } from "lodash-es";
+import { groupBy, get, set, head } from "lodash-es";
 import { safeParseAsync } from "valibot";
-import type { BaseSchema, SchemaIssue } from "valibot";
+import type { GenericSchema, GenericIssue, IssuePathItem } from "valibot";
 
 type MaybeRefOrGetterArray<T> = MaybeRefOrGetter<T> | MaybeRefOrGetter<T>[];
 
@@ -25,7 +25,7 @@ type ValidationReturns = Promise<ValidateElements>;
 type ValidationFn = () => Promise<ValidateElements>;
 
 interface Errors {
-  [key: string]: Errors | SchemaIssue[];
+  [key: string]: Errors | GenericIssue[];
 }
 
 type Api = {
@@ -44,7 +44,9 @@ const ValidationApiContext = Symbol("ValidationApiContext");
 function useValidationApiContext(): Api {
   let context = inject(ValidationApiContext, null);
   if (context === null) {
-    let err = new Error(`<Is missing a parent useValibotValidation composable.`);
+    let err = new Error(
+      `<Is missing a parent useValibotValidation composable.`
+    );
     if (Error.captureStackTrace)
       // @ts-ignore
       Error.captureStackTrace(err, ValidationApiContext);
@@ -53,8 +55,8 @@ function useValidationApiContext(): Api {
   return context as Api;
 }
 
-export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
-  schema?: T,
+export function useValibotValidation<T extends GenericSchema>(
+  schema?: MaybeRefOrGetter<T>,
   data?: MaybeRefOrGetterArray<Record<string, unknown>>,
   options?: { mode?: "eager" | "lazy"; registerAs?: string }
 ) {
@@ -97,8 +99,10 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
     const result = await safeParseAsync(toValue(schema), toValue(data));
 
     if (!result.success) {
-      const valiErrors = groupBy(result.issues, (i) =>
-        (i.path || []).map((ii) => ii.key).join(".")
+      const valiErrors = groupBy(result.issues, (issue) =>
+        (issue.path || [])
+          .map((item: IssuePathItem) => ("key" in item ? item.key : ""))
+          .join(".")
       );
       api.errors.value = {
         ...api.errors.value,
@@ -121,7 +125,11 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
   }
 
   function getErrorMessage(errorPath: string): string {
-    return String(get(api.errors.value, [errorPath, 0, "message"].join(".")));
+    const errorObject = get(api.errors.value, errorPath);
+    if (Array.isArray(errorObject)) {
+      return head(errorObject)?.message ?? "";
+    }
+    return "";
   }
 
   function hasError(errorPath: string): boolean {
@@ -132,7 +140,7 @@ export function useValibotValidation<T extends MaybeRefOrGetter<BaseSchema>>(
   function externalErrors(key: string, message: unknown) {
     errors.value = { ...errors.value, [key]: [{ message }] } as Record<
       string,
-      SchemaIssue[]
+      GenericIssue[]
     >;
   }
 

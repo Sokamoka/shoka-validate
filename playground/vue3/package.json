@@ -17,7 +17,6 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "v-calendar": "^3.1.2",
-    "valibot": "^0.30.0",
     "vue": "^3.4.19",
     "zod": "^3.22.4"
   },

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { reactive, watch, shallowRef, h } from "vue";
 import { format } from "date-fns";
-import * as v from "valibot";
+// import * as v from "valibot";
 // import type { BaseSchema } from "valibot";
-import { useValibotValidation, Password } from "shoka-validate/valibot";
+import { useValibotValidation, Password, Email, RequiredDate, object, pick, safeParse } from "shoka-validate/valibot";
 import { useScrollToError } from "shoka-validate";
 import {
   Card,
@@ -42,10 +42,10 @@ const form = reactive<FormSchema>({
   dateOfBirth: 0,
 });
 
-const ValidationSchema = v.object({
-  email: v.string([v.minLength(1), v.email()]),
+const ValidationSchema = object({
+  email: Email,
   password: Password,
-  dateOfBirth: v.date("Please add date of birth"),
+  dateOfBirth: RequiredDate('Date of Birth'),
 });
 
 const { errors, getErrorMessage, hasError, validate } = useValibotValidation(
@@ -59,14 +59,13 @@ const { toast } = useToast();
 
 watch(() => form.password, checkPassword, { immediate: true });
 
-function checkPassword(value: string) {
-  const passwordSchema = v.pick(ValidationSchema, ["password"]);
-  const result = v.safeParse(passwordSchema, { password: value });
-  // console.log(result);
+function checkPassword(value?: string) {
+  const passwordSchema = pick(ValidationSchema, ["password"]);
+  const result = safeParse(passwordSchema, { password: value });
   const issues = result.issues || [];
   passwordRules.value = {
     length: !issues.some((issue) =>
-      ["min_length", "max_length"].includes(issue.context)
+      ["min_length", "max_length"].includes(issue.type)
     ),
     numberAndLetter: !issues.some(({ expected }) => expected === "/[0-9]/"),
     upperAndLower: !issues.some((issue) =>

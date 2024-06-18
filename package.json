@@ -33,7 +33,7 @@
   "author": "Ákos Stégner",
   "license": "MIT",
   "dependencies": {
-    "valibot": "^0.30.0",
+    "valibot": "^0.31.0",
     "vue": "^3.4.21",
     "zod": "^3.22.4"
   },
